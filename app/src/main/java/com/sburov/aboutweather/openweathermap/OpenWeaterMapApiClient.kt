@@ -11,7 +11,7 @@ class OpenWeaterMapApiClient(
 ) {
     companion object {
         const val BASE_ENDPOINT = "https://api.openweathermap.org/data/2.5/"
-        const val API_KEY = "8eced8171c52abccb9e73b81aaaec216"
+        const val API_KEY = "placeholder"
     }
 
     fun getCurrentWeather() = Retrofit.Builder()

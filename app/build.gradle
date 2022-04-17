@@ -1,18 +1,21 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
 }
 
 android {
-    compileSdk 29
-
+    compileSdk 31
+    buildToolsVersion = "32.0.0"
     defaultConfig {
         applicationId "com.sburov.aboutweather"
         minSdk 27
         targetSdk 29
         versionCode 1
         versionName "1.0"
+
+        buildConfigField("String", "API_KEY", getApiKey('local.properties')['API_KEY_PROD'])
+        buildConfigField("String", "API_KEY_TEST", getApiKey('local.properties')['API_KEY_TEST'])
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,10 +46,24 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-apache:$ktor_version"
+    implementation "io.ktor:ktor-client-okhttp:$ktor_version"
+    implementation "io.ktor:ktor-client-android:$ktor_version"
+    implementation "io.ktor:ktor-client-cio:$ktor_version"
+    implementation "io.ktor:ktor-client-jetty:$ktor_version"
+
+    implementation "io.ktor:ktor-client-resources:$ktor_version"
+    implementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
+    implementation "io.ktor:ktor-serialization-kotlinx-xml:$ktor_version"
+    implementation "io.ktor:ktor-serialization-kotlinx-cbor:$ktor_version"
+
+    implementation "io.ktor:ktor-client-logging:$ktor_version"
+
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-jaxb:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
-
-    implementation libs.androidx.activity
+    implementation "androidx.activity:activity-ktx:$activity_version"
 }
