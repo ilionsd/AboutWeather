@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.data
+package com.sburov.aboutweather.openweathermap.data
 
 import android.location.Location
 import kotlinx.serialization.Contextual
@@ -15,7 +15,6 @@ data class WeatherDataXml(
     val wind: Wind?,
     val clouds: Clouds?,
     val visibility: Measurement?,
-
 )
 
 @kotlinx.serialization.Serializable
@@ -54,7 +53,7 @@ data class IntervalMeasurement(
 )
 
 @kotlinx.serialization.Serializable
-data class Wind(
+data class XmlWind(
     val speed: Speed?,
     val gust: Speed?,
     val direction: Direction?,

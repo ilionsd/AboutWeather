@@ -18,6 +18,7 @@ class OpenWeatherMapApiTest {
         const val LON: Float = 44.0075F
         val UNITS = Units.METRIC
         val MODE = Mode.JSON
+        val LANG = Language.ENGLISH
     }
 
     @Test
@@ -33,7 +34,7 @@ class OpenWeatherMapApiTest {
         }
 
         val response: HttpResponse = runBlocking {
-            client.get(OpenWeatherMap.CurrentWeather(OpenWeatherMap(API_KEY_TEST, MODE), LAT, LON, UNITS))
+            client.get(OpenWeatherMap.CurrentWeather(OpenWeatherMap(API_KEY_TEST, MODE, LANG), LAT, LON, UNITS))
         }
         when (response.status.value) {
             in 200..299 -> print(runBlocking { response.bodyAsText() })

@@ -4,6 +4,7 @@ buildscript {
         gradle_version = '7.0.4'
         kotlin_version = '1.6.20'
         ktor_version = '2.0.0'
+        arrow_version = '1.0.1'
         activity_version = '1.4.0'
 
         getApiKey = { filename ->

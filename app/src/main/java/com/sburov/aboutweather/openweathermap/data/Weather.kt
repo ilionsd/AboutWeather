@@ -1,72 +1,154 @@
-package com.sburov.aboutweather.data
+package com.sburov.aboutweather.openweathermap.data
 
 import android.location.Location
-import kotlinx.serialization.Contextual
-import java.time.Instant
+import kotlinx.datetime.Instant
+import kotlinx.serialization.*
+import java.time.ZoneOffset
 
-@kotlinx.serialization.Serializable
-data class WeatherDataJson(
-    @Contextual
-    val coordinates: Location?,
-    val weather: Weather?,
+@Serializable
+data class Weather(
+    @SerialName("coord")
+    val coordinates: Coordinates?,
+
+    @SerialName("weather")
+    val weather: List<Sky?>,
+
     val base: String?,
-    val main: MainData?,
-    val visibility: Int?,
+
+    @SerialName("main")
+    val main: Data?,
+
+    val visibility: Float?,
+
     val wind: Wind?,
+
     val clouds: Clouds?,
-    @Contextual
+
+    val rain: Precipitation?,
+
+    val snow: Precipitation?,
+
     val dt: Instant?,
-    val sys: SystemData?,
+
+    @SerialName("sys")
+    val sys: System?,
+
     val timezone: Int?,
+
+    @SerialName("id")
     val cityID: Int?,
+
+    @SerialName("name")
     val cityName: String?,
+
+    @SerialName("cod")
     val code: Int?,
 )
 
-@kotlinx.serialization.Serializable
-data class Weather(
+@Serializable
+data class Coordinates(
+    val lat: Float,
+    val lon: Float,
+) {
+    constructor(location: Location) : this(location.latitude.toFloat(), location.longitude.toFloat())
+}
+
+@Serializable
+data class Sky(
     val id: WeatherCode?,
     val main: String?,
     val description: String?,
     val icon: String?,
 )
 
-@kotlinx.serialization.Serializable
-data class MainData(
+@Serializable
+data class Data(
+    @SerialName("temp")
     val temperature: Float?,
-    val temperatureFeelsLike: Float?,
+
+    @SerialName("feels_like")
+    val feelsLike: Float?,
+
+    @SerialName("temp_min")
     val temperatureMin: Float?,
+
+    @SerialName("temp_max")
     val temperatureMax: Float?,
-    val pressure: Int?,
-    val pressureSeaLevel: Int?,
-    val pressureGroundLevel: Int?,
-    val humidity: Int?,
+
+    val pressure: Float?,
+
+    @SerialName("sea_level")
+    val pressureSeaLevel: Float?,
+
+    @SerialName("grnd_level")
+    val pressureGroundLevel: Float?,
+
+    val humidity: Float?,
 )
 
-@kotlinx.serialization.Serializable
-data class _Wind(
+@Serializable
+data class Wind(
     val speed: Float?,
+
+    @SerialName("deg")
     val degree: Int?,
+
     val gust: Float?,
 )
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class Clouds(
     val all: Int?
 )
 
-@kotlinx.serialization.Serializable
-data class SystemData(
+@Serializable
+data class Precipitation(
+    @SerialName("1h")
+    val in1h: Float?,
+
+    @SerialName("3h")
+    val in3h: Float?,
+)
+
+@Serializable
+data class System(
     val type: Int?,
     val id: Int?,
     val message: Double?,
     val country: String?,
-    @Contextual
     val sunrise: Instant?,
-    @Contextual
     val sunset: Instant?,
 )
 
+@Serializable
+data class XmlWeather constructor(
+    val city: City?,
+    val temperature: IntervalMeasurement?,
+    val feelsLike: Measurement?,
+    val humidity: Measurement?,
+    val pressure: Measurement?,
+    val wind: Wind?,
+    val clouds: Clouds?,
+    val visibility: Measurement?,
+)
+
+data class XmlCity(
+    val id: Int?,
+    val name: String?,
+    val coordinates: Location?,
+    val country: String?,
+    val timezone: ZoneOffset?,
+    val sun: Sun?,
+)
+
+data class XmlSun(
+    val rise: Instant?,
+    val set: Instant?,
+)
+
+
+
+@Serializable
 enum class WeatherCode(code: Int) {
     // 2xx codes
     THUNDERSTORM_WITH_LIGHT_RAIN(200),
