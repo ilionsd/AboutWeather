@@ -1,4 +1,4 @@
-package com.sburov.aboutweather
+package com.sburov.aboutweather.location
 
 import android.annotation.SuppressLint
 import android.app.Service
@@ -10,35 +10,32 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
-import java.util.concurrent.atomic.AtomicReference
 
-typealias LocationUpdateListener = (Location?) -> Unit
+typealias LocationUpdateListener = (Location) -> Unit
 
 @SuppressLint("MissingPermission")
 class LocationReceiver : Service() {
-    private val fusedLocationClient: FusedLocationProviderClient
+    private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
     private val listeners = mutableSetOf<LocationUpdateListener>()
 
     private var isListeningToLocationUpdates = false
 
-    init {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    }
-
     val lastLocation: Task<Location?>?
-        get() = kotlin.runCatching {
-            fusedLocationClient.lastLocation
+        get() = fusedLocationClient.runCatching {
+            lastLocation
         }.getOrNull()
 
     val currentLocation: Task<Location?>?
-        get() = CancellationTokenSource().runCatching {
-            fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, this.token)
+        get() = fusedLocationClient.runCatching {
+            getCurrentLocation(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, CancellationTokenSource().token)
         }.getOrNull()
 
-    fun sendLocationUpdate(location: Location?) {
-        for (listener in listeners) {
-            listener(location)
+    private fun sendLocationUpdate(location: Location?) {
+        location?.let {
+            for (listener in listeners) {
+                listener(it)
+            }
         }
     }
 
@@ -54,7 +51,5 @@ class LocationReceiver : Service() {
 
     fun removeLocationUpdateListener(listener: LocationUpdateListener): Boolean = listeners.remove(listener)
 
-    override fun onBind(intent: Intent?): IBinder? {
-        TODO("Not yet implemented")
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 }
