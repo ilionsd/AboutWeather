@@ -1,6 +1,6 @@
 package com.sburov.aboutweather.openweathermap
 
-import com.sburov.aboutweather.openweathermap.data.Weather
+import com.sburov.aboutweather.openweathermap.data.OpenWeatherMapData
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -50,11 +50,11 @@ class OpenWeatherMapApiTest {
     @Test
     fun currentWeatherJsonTest() {
         val response: HttpResponse = runBlocking {
-            client!!.get(OpenWeatherMap.CurrentWeather(OpenWeatherMap(API_KEY_TEST, MODE, LANG), LAT, LON, UNITS))
+            client!!.get(OpenWeatherMapRestApi.CurrentWeather(OpenWeatherMapRestApi(API_KEY_TEST, MODE, LANG), LAT, LON, UNITS))
         }
         when (response.status.value) {
             in 200..299 -> {
-                val data: Weather = runBlocking {
+                val data: OpenWeatherMapData = runBlocking {
                     response.body()
                 }
                 with(data) {

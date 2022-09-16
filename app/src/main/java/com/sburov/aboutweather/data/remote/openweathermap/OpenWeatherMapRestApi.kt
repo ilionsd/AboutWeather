@@ -66,7 +66,7 @@ enum class Language(name: String) {
 
 @Serializable
 @Resource("/data/2.5")
-class OpenWeatherMap constructor(
+class OpenWeatherMapRestApi constructor(
     val appID: String,
     val mode: Mode,
     val lang: Language = Language.ENGLISH,
@@ -74,7 +74,7 @@ class OpenWeatherMap constructor(
     @Serializable
     @Resource("/weather")
     class CurrentWeather constructor(
-        val parent: OpenWeatherMap,
+        val parent: OpenWeatherMapRestApi,
         val lat: Float,
         val lon: Float,
         val units: Units = Units.METRIC,

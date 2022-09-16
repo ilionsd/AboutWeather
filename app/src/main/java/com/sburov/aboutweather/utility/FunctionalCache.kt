@@ -4,30 +4,34 @@ import arrow.core.*
 
 sealed class CacheError
 
+data class EvaluatorException(val e: Throwable) : CacheError()
+
 object CacheMiss : CacheError()
 
 object CacheExpired : CacheError()
-
-object EvaluatorException : CacheError()
 
 class FunctionalCache<in K, out V>(
     private val evaluator: (K) -> V,
     private val invalidateIf: (V) -> Boolean
 ) {
-    private val responseCacheMap = mutableMapOf<K, V>()
+    private val cache = mutableMapOf<K, V>()
 
-    private fun getCachedResult(value: K): Either<CacheError, V> =
-        Option
-            .fromNullable(responseCacheMap[value])
-            .toEither { CacheMiss }
-            .filterOrElse({ invalidateIf(it).not() }, { CacheExpired })
-
-    private fun evaluateResult(value: K): Either<CacheError, V> =
-        Either.catch { evaluator(value) }.mapLeft { EvaluatorException }.tap { responseCacheMap[value] = it }
-
-    fun invalidate(value: K): FunctionalCache<K, V> = apply {
-        responseCacheMap.remove(value)
+    fun get(value: K): Either<CacheError, V> = search(value).handleErrorWith {
+        evaluate(value).tap { cache[value] = it }
     }
 
-    fun evaluate(value: K): Either<CacheError, V> = getCachedResult(value).handleErrorWith { evaluateResult(value) }
+    fun invalidate(value: K): FunctionalCache<K, V> = apply {
+        cache.remove(value)
+    }
+
+    fun search(value: K): Either<CacheError, V> =
+        Option
+            .fromNullable(cache[value]).toEither { CacheMiss }
+            .filterOrElse({ invalidateIf(it).not() }, { CacheExpired })
+
+    private fun evaluate(value: K): Either<CacheError, V> = Either.catch {
+        evaluator(value)
+    }.mapLeft {
+        EvaluatorException(it)
+    }
 }

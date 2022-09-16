@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.openweathermap
+package com.sburov.aboutweather.data.remote
 
 sealed class ApiError
 

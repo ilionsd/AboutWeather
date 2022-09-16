@@ -6,7 +6,7 @@ import kotlinx.serialization.*
 import java.time.ZoneOffset
 
 @Serializable
-data class Weather(
+data class OpenWeatherMapData(
     @SerialName("coord")
     val coordinates: Coordinates?,
 

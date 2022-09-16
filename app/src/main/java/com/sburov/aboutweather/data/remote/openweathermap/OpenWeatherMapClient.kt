@@ -1,7 +1,12 @@
-package com.sburov.aboutweather.openweathermap
+package com.sburov.aboutweather.data.remote.openweathermap
 
+import android.location.Location
 import arrow.core.Either
-import com.sburov.aboutweather.openweathermap.data.Weather
+import com.sburov.aboutweather.data.remote.ApiError
+import com.sburov.aboutweather.data.remote.NetworkError
+import com.sburov.aboutweather.data.remote.UnknownError
+import com.sburov.aboutweather.openweathermap.*
+import com.sburov.aboutweather.openweathermap.data.OpenWeatherMapData
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.*
@@ -14,7 +19,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.serialization.kotlinx.xml.*
 
-class OpenWeatherMapClient constructor(
+class OpenWeatherMapClient(
     httpClientEngine: HttpClientEngine? = null) {
 
     companion object {
@@ -44,15 +49,18 @@ class OpenWeatherMapClient constructor(
         }
     }
 
-    suspend fun getCurrentWeather(lat: Float, lon: Float, units: Units) : Either<ApiError, Weather> = try {
+    suspend fun getCurrentWeather(location: Location, units: Units = Units.METRIC) : Either<ApiError, OpenWeatherMapData> =
+        getCurrentWeather(location.latitude.toFloat(), location.longitude.toFloat(), units)
+
+    suspend fun getCurrentWeather(lat: Float, lon: Float, units: Units = Units.METRIC) : Either<ApiError, OpenWeatherMapData> = try {
         val response: HttpResponse = client.get(
-            OpenWeatherMap.CurrentWeather(
-                OpenWeatherMap(API_KEY, Mode.JSON, Language.ENGLISH),
+            OpenWeatherMapRestApi.CurrentWeather(
+                OpenWeatherMapRestApi(API_KEY, Mode.JSON, Language.ENGLISH),
                 lat, lon, units
             )
         )
-        val weather: Weather = response.body()
-        Either.Right(weather)
+        val data: OpenWeatherMapData = response.body()
+        Either.Right(data)
     } catch (e: RedirectResponseException) {
         // 3xx
         Either.Left(UnknownError(e.response.status.value))
