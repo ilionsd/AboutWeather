@@ -75,6 +75,9 @@ class OpenMeteoRestApi(
         @SerialName("longitude")
         val lon: Float,
 
+        @SerialName("hourly")
+        val forecastData: Set<Variable>,
+
         @SerialName("current_weather")
         val current: Boolean,
     )

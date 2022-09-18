@@ -4,16 +4,17 @@ import androidx.annotation.DrawableRes
 import com.sburov.aboutweather.R
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ArraySerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.descriptors.PolymorphicKind
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildSerialDescriptor
+import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 sealed class WeatherType(
     val weatherDesc: String,
@@ -193,6 +194,9 @@ sealed class WeatherType(
 
 @Serializable
 enum class Variable {
+    @SerialName("time")
+    TIME,
+
     @SerialName("temperature_2m")
     TEMPERATURE_2M,
     @SerialName("apparent_temperature")
@@ -286,7 +290,7 @@ enum class Variable {
 
 @Serializable(with = MeasurementsSerializer::class)
 data class Measurements(
-    val time: Array<DateTimeUnit>,
+    val time: Array<LocalDateTime>,
     val measurements: Map<Variable, Array<Float>>
 ) {
     override fun equals(other: Any?): Boolean {
@@ -311,29 +315,29 @@ data class Measurements(
 object MeasurementsSerializer : KSerializer<Measurements> {
 
     @OptIn(InternalSerializationApi::class, ExperimentalSerializationApi::class)
-    override val descriptor: SerialDescriptor
-        get() = buildSerialDescriptor("Measurements", PolymorphicKind.SEALED) {
-
-    }
+    override val descriptor: SerialDescriptor = buildSerialDescriptor("MeasurementsSerializer", PolymorphicKind.SEALED)
 
     override fun serialize(encoder: Encoder, value: Measurements) {
         TODO("Not yet implemented")
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    override fun deserialize(decoder: Decoder): Measurements = decoder.decodeStructure(descriptor) {
-        var time = emptyArray<DateTimeUnit>()
+    override fun deserialize(decoder: Decoder): Measurements = with(decoder as JsonDecoder) {
+        var time = emptyArray<LocalDateTime>()
         var vars = mutableMapOf<Variable, Array<Float>>()
-        while (true) {
-            when (val index = decodeElementIndex(descriptor)) {
-                DECODE_DONE -> break // Input is over
-                0 -> time = decodeSerializableElement(descriptor, 0, ArraySerializer(DateTimeUnit.serializer()))
+
+        val jsonObject = decodeJsonElement().jsonObject
+
+        for (entry in jsonObject.entries) {
+            val variable: Variable = Variable.values().find {
+                Variable::class.java.getField(it.name).getAnnotation(SerialName::class.java)?.value == entry.key }!!
+            when (variable) {
+                Variable.TIME -> time = json.decodeFromJsonElement(ArraySerializer(LocalDateTime.serializer()), entry.value)
                 else -> {
-                    val variable: Variable = enumValueOf(descriptor.getElementName(index))
                     if (vars.containsKey(variable)) {
-                        error("Unexpected element at index: $index")
+                        error("Variable $variable already exists!")
                     }
-                    vars[variable] = decodeSerializableElement(descriptor, index, ArraySerializer(Float.serializer()))
+                    vars[variable] = json.decodeFromJsonElement(ArraySerializer(Float.serializer()), entry.value)
                 }
             }
         }
@@ -363,22 +367,22 @@ data class OpenMeteoData(
     @SerialName("timezone_abbreviation")
     val timeZoneAbbreviation: String,
 
-    @SerialName("hourly")
-    val hourlyData: Measurements?,
+    @SerialName("current_weather")
+    val currentWeather: CurrentWeather? = null,
 
     @SerialName("hourly_units")
-    val hourlyUnits: Map<Variable, String>?,
+    val hourlyUnits: Map<Variable, String>? = null,
 
-    @SerialName("current_weather")
-    val currentWeather: CurrentWeather?
+    @SerialName("hourly")
+    val hourlyData: Measurements? = null,
 )
 
 @Serializable
 data class CurrentWeather(
-    val time: DateTimeUnit,
+    val time: LocalDateTime,
     val temperature: Float,
     @SerialName("weathercode")
-    val weatherCodeWMO: Int,
+    val weatherCodeWMO: Float,
     @SerialName("windspeed")
     val windSpeed: Float,
     @SerialName("winddirection")

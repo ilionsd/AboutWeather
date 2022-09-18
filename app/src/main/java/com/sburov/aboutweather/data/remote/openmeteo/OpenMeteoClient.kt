@@ -34,7 +34,13 @@ class OpenMeteoClient {
                     TimeFormat.ISO8601,
                     TimeZone.AUTO
                 ),
-                lat, lon, true
+                lat, lon,
+                setOf(
+                    Variable.TEMPERATURE_2M,
+                    Variable.PRESSURE_SURFACE,
+                    Variable.WIND_SPEED_10M,
+                    Variable.HUMIDITY_RELATIVE_2M,
+                    Variable.WEATHER_CODE_WMO), true
             )
         )
         val data: OpenMeteoData = response.body()
