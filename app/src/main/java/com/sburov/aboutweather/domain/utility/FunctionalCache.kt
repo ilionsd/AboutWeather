@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.utility
+package com.sburov.aboutweather.domain.utility
 
 import arrow.core.*
 

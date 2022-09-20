@@ -3,8 +3,6 @@ package com.sburov.aboutweather.data.remote.openweathermap
 import android.location.Location
 import arrow.core.Either
 import com.sburov.aboutweather.data.remote.ApiError
-import com.sburov.aboutweather.data.remote.NetworkError
-import com.sburov.aboutweather.data.remote.UnknownError
 import com.sburov.aboutweather.openweathermap.*
 import com.sburov.aboutweather.openweathermap.data.OpenWeatherMapData
 import io.ktor.client.*
@@ -63,14 +61,14 @@ class OpenWeatherMapClient(
         Either.Right(data)
     } catch (e: RedirectResponseException) {
         // 3xx
-        Either.Left(UnknownError(e.response.status.value))
+        Either.Left(ApiError.UnknownError(e.response.status.value))
     } catch (e: ClientRequestException) {
         // 4xx
-        Either.Left(UnknownError(e.response.status.value))
+        Either.Left(ApiError.UnknownError(e.response.status.value))
     } catch (e: ServerResponseException) {
         // 5xx
-        Either.Left(UnknownError(e.response.status.value))
+        Either.Left(ApiError.UnknownError(e.response.status.value))
     } catch (e: Exception) {
-        Either.Left(NetworkError)
+        Either.Left(ApiError.NetworkError)
     }
 }

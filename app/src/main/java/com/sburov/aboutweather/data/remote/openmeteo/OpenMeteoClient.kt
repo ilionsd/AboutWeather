@@ -2,17 +2,15 @@ package com.sburov.aboutweather.data.remote.openmeteo
 
 import android.location.Location
 import arrow.core.Either
-import com.sburov.aboutweather.data.remote.HttpClientFactory
-import com.sburov.aboutweather.data.remote.ApiError
-import com.sburov.aboutweather.data.remote.NetworkError
-import com.sburov.aboutweather.data.remote.UnknownError
+import com.sburov.aboutweather.data.remote.*
+import com.sburov.aboutweather.domain.WeatherDataProvider
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.resources.*
 
-class OpenMeteoClient {
+class OpenMeteoClient : WeatherDataProvider {
 
     companion object {
         const val REMOTE_ENDPOINT = "api.open-meteo.com"
@@ -21,7 +19,7 @@ class OpenMeteoClient {
     private val client: HttpClient = HttpClientFactory(OkHttp)
         .getHttpClient(REMOTE_ENDPOINT)
 
-    suspend fun getForecast(location: Location): Either<ApiError, OpenMeteoData> =
+    override suspend fun getForecast(location: Location): Either<ApiError, OpenMeteoData> =
         getForecast(location.latitude.toFloat(), location.longitude.toFloat())
 
     suspend fun getForecast(lat: Float, lon: Float) : Either<ApiError, OpenMeteoData> = try {
@@ -47,14 +45,14 @@ class OpenMeteoClient {
         Either.Right(data)
     } catch (e: RedirectResponseException) {
         // 3xx
-        Either.Left(UnknownError(e.response.status.value))
+        Either.Left(ApiError.UnknownError(e.response.status.value))
     } catch (e: ClientRequestException) {
         // 4xx
-        Either.Left(UnknownError(e.response.status.value))
+        Either.Left(ApiError.UnknownError(e.response.status.value))
     } catch (e: ServerResponseException) {
         // 5xx
-        Either.Left(UnknownError(e.response.status.value))
+        Either.Left(ApiError.UnknownError(e.response.status.value))
     } catch (e: Exception) {
-        Either.Left(NetworkError)
+        Either.Left(ApiError.NetworkError)
     }
 }

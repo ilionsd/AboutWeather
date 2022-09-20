@@ -7,6 +7,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Task
+import com.sburov.aboutweather.domain.LocationProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -17,7 +18,7 @@ typealias LocationUpdateListener = (Location) -> Unit
 @ExperimentalCoroutinesApi
 class LocationReceiver(
     private val context: Context
-) {
+): LocationProvider {
     companion object {
         private const val TAG = "LocationReceiver"
     }
@@ -28,7 +29,7 @@ class LocationReceiver(
 
     private var isListeningToLocationUpdates = false
 
-    suspend fun getLastLocation(): Location? = suspendCancellableCoroutine { continuation ->
+    override suspend fun getLastLocation(): Location? = suspendCancellableCoroutine { continuation ->
         fusedLocationClient.runCatching { lastLocation }.getOrNull()?.apply {
             if (isComplete) {
                 if (isSuccessful) {
@@ -50,7 +51,7 @@ class LocationReceiver(
             }
         }
     }
-    suspend fun getCurrentLocation(): Location? = suspendCancellableCoroutine { continuation ->
+    override suspend fun getCurrentLocation(): Location? = suspendCancellableCoroutine { continuation ->
         val tokenSource = CancellationTokenSource()
         fusedLocationClient
             .runCatching { getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, tokenSource.token)  }

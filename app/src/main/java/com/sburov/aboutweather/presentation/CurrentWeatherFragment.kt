@@ -1,4 +1,4 @@
-package com.sburov.aboutweather
+package com.sburov.aboutweather.presentation
 
 import android.content.Context
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
+import com.sburov.aboutweather.R
 import com.sburov.aboutweather.data.location.LocationReceiver
 import javax.inject.Inject
 
