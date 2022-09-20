@@ -10,13 +10,20 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import arrow.core.Either
+import com.sburov.aboutweather.R
 import com.sburov.aboutweather.presentation.ui.theme.AboutWeatherTheme
 import com.sburov.aboutweather.presentation.ui.theme.DarkBlue
+import com.sburov.aboutweather.presentation.ui.theme.DeepBlue
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,12 +47,35 @@ class MainActivity : ComponentActivity() {
         setContent {
             AboutWeatherTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Column(modifier = Modifier
-                        .fillMaxSize()
-                        .background(DarkBlue)) {
-
+                    when (val info = viewModel.info) {
+                        is Either.Left -> when (info.value) {
+                            DataError.Unavailable -> {
+                                Text(
+                                    text = getString(R.string.data_error_unavailable),
+                                    color = Color.Red,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                            DataError.InProgress -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                        is Either.Right -> {
+                            Column(modifier = Modifier
+                                .fillMaxSize()
+                                .background(DarkBlue)) {
+                                WeatherCard(
+                                    info = info,
+                                    backgroundColor = DeepBlue
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                WeatherForecast(info = info)
+                            }
+                        }
                     }
-
                 }
             }
         }
