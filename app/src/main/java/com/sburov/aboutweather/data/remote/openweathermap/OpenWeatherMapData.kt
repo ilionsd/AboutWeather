@@ -31,7 +31,7 @@ data class OpenWeatherMapData(
     val dt: Instant?,
 
     @SerialName("sys")
-    val sys: System?,
+    val sys: SystemData?,
 
     val timezone: Int?,
 
@@ -111,7 +111,7 @@ data class Precipitation(
 )
 
 @Serializable
-data class System(
+data class SystemData(
     val type: Int?,
     val id: Int?,
     val message: Double?,

@@ -9,8 +9,10 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.resources.*
+import javax.inject.Inject
 
-class OpenMeteoClient : WeatherDataProvider {
+class OpenMeteoClient @Inject constructor()
+    : WeatherDataProvider {
 
     companion object {
         const val REMOTE_ENDPOINT = "api.open-meteo.com"
