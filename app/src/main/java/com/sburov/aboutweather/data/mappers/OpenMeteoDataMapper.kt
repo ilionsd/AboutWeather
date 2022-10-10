@@ -46,7 +46,7 @@ fun CurrentWeather.toWeatherData(units: Map<Variable, String>): WeatherData = We
     windDirection = Measurement(windDirection, units[Variable.WIND_DIRECTION_10M]!!)
 )
 
-fun OpenMeteoData.toWeatherInfo() : WeatherInfo {
+fun OpenMeteoData.toWeatherInfo(): WeatherInfo {
     val current = currentWeather?.toWeatherData(hourlyUnits!!)
     val forecast = hourlyData?.toWeatherDataList(hourlyUnits!!)
     return WeatherInfo(current, forecast)

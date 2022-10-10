@@ -1,7 +1,9 @@
 package com.sburov.aboutweather.di
 
+import com.sburov.aboutweather.data.location.LocationProviderImpl
+import com.sburov.aboutweather.data.location.LocationReceiverImpl
 import com.sburov.aboutweather.domain.LocationProvider
-import com.sburov.aboutweather.data.location.LocationReceiver
+import com.sburov.aboutweather.domain.LocationReceiver
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -16,5 +18,9 @@ abstract class LocationModule {
 
     @Binds
     @Singleton
-    abstract fun bindLocationProvider(locationReceiver: LocationReceiver) : LocationProvider
+    abstract fun bindLocationProvider(locationProvider: LocationProviderImpl) : LocationProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindLocationReceiver(locationReceiver: LocationReceiverImpl) : LocationReceiver
 }

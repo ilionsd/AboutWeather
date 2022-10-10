@@ -39,6 +39,7 @@ class OpenMeteoClient @Inject constructor()
                     Variable.TEMPERATURE_2M,
                     Variable.PRESSURE_SURFACE,
                     Variable.WIND_SPEED_10M,
+                    Variable.WIND_DIRECTION_10M,
                     Variable.HUMIDITY_RELATIVE_2M,
                     Variable.WEATHER_CODE_WMO), true
             )

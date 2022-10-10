@@ -8,32 +8,53 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.sburov.aboutweather.data.mappers.toWeatherInfo
 import com.sburov.aboutweather.domain.LocationProvider
+import com.sburov.aboutweather.domain.LocationReceiver
 import com.sburov.aboutweather.domain.WeatherDataProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
+    private val locationReceiver: LocationReceiver,
     private val locationProvider: LocationProvider,
     private val weatherDataProvider: WeatherDataProvider,
 ) : ViewModel() {
 
-    var info by mutableStateOf<Either<DataError, WeatherInfo>>(Either.Left(DataError.Unavailable))
+    var info by mutableStateOf<Either<DataError, WeatherInfo>>(Either.Left(DataError.GeolocationUnavailable))
         private set
 
     fun loadWeatherInfo() {
         val infoRef = info
-        if (infoRef is Either.Left && infoRef.value is DataError.InProgress) {
-            return
+        when {
+            infoRef is Either.Left && infoRef.value is DataError.InProgress -> {
+                return
+            }
+            else -> viewModelScope.launch {
+                info = Either.Left(DataError.InProgress)
+
+                info = locationProvider.getCurrentLocation()?.let { location ->
+                    weatherDataProvider.getForecast(location)
+                        .bimap({ _ -> DataError.WeatherInfoUnavailable }, { data -> data.toWeatherInfo() })
+                } ?: Either.Left(DataError.GeolocationUnavailable)
+            }
         }
-        viewModelScope.launch {
-            info = Either.Left(DataError.InProgress)
-            locationProvider.getLastLocation()?.let { location ->
-                info = weatherDataProvider.getForecast(location)
-                    .bimap({ _ -> DataError.Unavailable }, { data -> data.toWeatherInfo() })
-            } ?: kotlin.run {
-                info = Either.Left(DataError.Unavailable)
+    }
+
+    fun receiveWeatherInfo() {
+        val infoRef = info
+        when {
+            infoRef is Either.Left && infoRef.value is DataError.InProgress -> {
+                return
+            }
+            else -> viewModelScope.launch {
+                info = Either.Left(DataError.InProgress)
+                locationReceiver.addLocationDataUpdateListener {
+                    info = weatherDataProvider.getForecast(it)
+                            .bimap({ _ -> DataError.WeatherInfoUnavailable }, { data -> data.toWeatherInfo() })
+                }
+                locationReceiver.startListeningToLocationUpdates()
             }
         }
     }

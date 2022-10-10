@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">AboutWeather</string>
 
-    <string name="data_error_unavailable">Data Unavailable</string>
+    <string name="data_error_geolocation_unavailable">Geolocation Unavailable</string>
+    <string name="data_error_weatherinfo_unavailable">Weather information Unavailable</string>
 
     <string name="launch_activity">Launch activity</string>
     <string name="location_unknown">Location Unknown</string>

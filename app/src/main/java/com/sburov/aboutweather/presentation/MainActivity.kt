@@ -21,10 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import arrow.core.Either
 import com.sburov.aboutweather.R
+import com.sburov.aboutweather.domain.LocationReceiver
 import com.sburov.aboutweather.presentation.ui.theme.AboutWeatherTheme
 import com.sburov.aboutweather.presentation.ui.theme.DarkBlue
 import com.sburov.aboutweather.presentation.ui.theme.DeepBlue
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
     private val permissionLauncher: ActivityResultLauncher<Array<String>> = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) {
-        viewModel.loadWeatherInfo()
+        viewModel.receiveWeatherInfo()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +43,9 @@ class MainActivity : ComponentActivity() {
 
         if (checkFineLocationPermission(this) ||
             checkCoarseLocationPermission(this)) {
+            viewModel.receiveWeatherInfo()
+        }
+        else {
             requestPermissions()
         }
 
@@ -49,9 +54,17 @@ class MainActivity : ComponentActivity() {
                 Box(modifier = Modifier.fillMaxSize()) {
                     when (val info = viewModel.info) {
                         is Either.Left -> when (info.value) {
-                            DataError.Unavailable -> {
+                            DataError.GeolocationUnavailable -> {
                                 Text(
-                                    text = getString(R.string.data_error_unavailable),
+                                    text = getString(R.string.data_error_geolocation_unavailable),
+                                    color = Color.Red,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                            DataError.WeatherInfoUnavailable -> {
+                                Text(
+                                    text = getString(R.string.data_error_weatherinfo_unavailable),
                                     color = Color.Red,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.align(Alignment.Center)
@@ -84,9 +97,11 @@ class MainActivity : ComponentActivity() {
     private fun requestPermissions() {
         permissionLauncher.launch(
             arrayOf(
+                // Can't launch access background location permission alongside other permissions,
+                // because the platform will ignore such request.
+                // Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                Manifest.permission.ACCESS_COARSE_LOCATION)
         )
     }
 }
