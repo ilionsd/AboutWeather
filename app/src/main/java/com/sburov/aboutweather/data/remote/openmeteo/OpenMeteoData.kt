@@ -1,5 +1,7 @@
 package com.sburov.aboutweather.data.remote.openmeteo
 
+import com.sburov.aboutweather.data.serialization.DataGrid
+import com.sburov.aboutweather.data.serialization.DataGridSerializer
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ArraySerializer
@@ -9,7 +11,6 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.jsonObject
-
 
 
 @Serializable
@@ -153,7 +154,7 @@ object MeasurementsSerializer : KSerializer<Measurements> {
     @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): Measurements = with(decoder as JsonDecoder) {
         var time = emptyArray<LocalDateTime>()
-        var vars = mutableMapOf<Variable, Array<Float>>()
+        val vars = mutableMapOf<Variable, Array<Float>>()
 
         val jsonObject = decodeJsonElement().jsonObject
 
@@ -173,6 +174,21 @@ object MeasurementsSerializer : KSerializer<Measurements> {
         Measurements(time, vars)
     }
 }
+
+@OptIn(ExperimentalSerializationApi::class)
+object OpenMeteoDataGridSerializer: DataGridSerializer<Variable>(
+    mapSerialDescriptor<Variable, Array<Any?>>(),
+    serializer(),
+    mapOf(
+        Variable.TIME to LocalDateTime.serializer(),
+        Variable.TEMPERATURE_2M to Float.serializer(),
+        Variable.PRESSURE_SURFACE to Float.serializer(),
+        Variable.WIND_SPEED_10M to Float.serializer(),
+        Variable.WIND_DIRECTION_10M to Float.serializer(),
+        Variable.HUMIDITY_RELATIVE_2M to Float.serializer(),
+        Variable.WEATHER_CODE_WMO to Int.serializer()
+    ).mapValues { (_, serializer) -> serializer as KSerializer<Any?> }
+)
 
 @Serializable
 data class OpenMeteoData(
@@ -202,8 +218,9 @@ data class OpenMeteoData(
     @SerialName("hourly_units")
     val hourlyUnits: Map<Variable, String>? = null,
 
+    @Serializable(with = OpenMeteoDataGridSerializer::class)
     @SerialName("hourly")
-    val hourlyData: Measurements? = null,
+    val hourlyData: DataGrid<Variable>? = null,
 )
 
 @Serializable

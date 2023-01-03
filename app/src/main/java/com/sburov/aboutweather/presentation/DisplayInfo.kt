@@ -4,20 +4,20 @@ import androidx.annotation.DrawableRes
 import com.sburov.aboutweather.R
 import java.time.LocalDateTime
 
-data class WeatherInfo(
-    val current: WeatherData? = null,
-    val forecast: List<WeatherData>? = null,
+data class DisplayInfo(
+    val current: DisplayWeather? = null,
+    val forecast: List<DisplayWeather>? = null,
 )
 
-data class WeatherData(
+data class DisplayWeather(
     val time: LocalDateTime,
     val weatherType: WeatherType,
-    val temperature: Measurement,
-    val windSpeed: Measurement,
-    val windDirection: Measurement,
+    val temperature: DisplayData<Float>,
+    val windSpeed: DisplayData<Float>,
+    val windDirection: DisplayData<Float>,
 )
 
-data class Measurement(val value: Float, val unit: String) {
+data class DisplayData<T>(val value: T, val unit: String) {
     override fun toString(): String = "${value}${unit}"
 }
 

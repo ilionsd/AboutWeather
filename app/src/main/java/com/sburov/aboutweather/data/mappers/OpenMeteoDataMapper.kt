@@ -1,35 +1,33 @@
 package com.sburov.aboutweather.data.mappers
 
 import com.sburov.aboutweather.data.remote.openmeteo.CurrentWeather
-import com.sburov.aboutweather.data.remote.openmeteo.Measurements
 import com.sburov.aboutweather.data.remote.openmeteo.OpenMeteoData
 import com.sburov.aboutweather.data.remote.openmeteo.Variable
-import com.sburov.aboutweather.presentation.Measurement
-import com.sburov.aboutweather.presentation.WeatherData
-import com.sburov.aboutweather.presentation.WeatherInfo
+import com.sburov.aboutweather.presentation.DisplayData
+import com.sburov.aboutweather.presentation.DisplayWeather
+import com.sburov.aboutweather.presentation.DisplayInfo
 import com.sburov.aboutweather.presentation.WeatherType
 import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.LocalDateTime
 
-fun Measurements.toWeatherDataList(units: Map<Variable, String>) : List<WeatherData> {
-    val list = mutableListOf<WeatherData>()
-    for (k in time.indices) {
+fun mapToDisplay(data: Map<Variable, Array<Any?>>, units: Map<Variable, String>) : List<DisplayWeather> {
+    val list = mutableListOf<DisplayWeather>()
+
+    val dataSize = data[Variable.TIME]!!.size
+    for (k in 0 until dataSize) {
         try {
-            WeatherData(
-                time = time[k].toJavaLocalDateTime(),
-                weatherType = measurements[Variable.WEATHER_CODE_WMO]?.let {
-                    WeatherType.fromWMO(it[k].toInt())
-                }!!,
-                temperature = measurements[Variable.TEMPERATURE_2M]?.let {
-                    Measurement(it[k], units[Variable.TEMPERATURE_2M]!!)
-                }!!,
-                windSpeed = measurements[Variable.WIND_SPEED_10M]?.let {
-                    Measurement(it[k], units[Variable.WIND_SPEED_10M]!!)
-                }!!,
-                windDirection = measurements[Variable.WIND_DIRECTION_10M]?.let {
-                    Measurement(it[k], units[Variable.WIND_DIRECTION_10M]!!)
-                }!!
+            DisplayWeather(
+                time = (data[Variable.TIME]!![k] as LocalDateTime).toJavaLocalDateTime(),
+                weatherType = WeatherType.fromWMO(data[Variable.WEATHER_CODE_WMO]!![k] as Int),
+                temperature = DisplayData((data[Variable.TEMPERATURE_2M]!![k] as Float),
+                    units[Variable.TEMPERATURE_2M]!!),
+                windSpeed = DisplayData((data[Variable.WIND_SPEED_10M]!![k] as Float),
+                    units[Variable.WIND_SPEED_10M]!!),
+                windDirection = DisplayData(data[Variable.WIND_DIRECTION_10M]!![k] as Float,
+                    units[Variable.WIND_DIRECTION_10M]!!)
             )
-        } catch (e: NullPointerException) {
+        }
+        catch (e: NullPointerException) {
             null
         } ?.let {
             list.add(it)
@@ -38,16 +36,16 @@ fun Measurements.toWeatherDataList(units: Map<Variable, String>) : List<WeatherD
     return list
 }
 
-fun CurrentWeather.toWeatherData(units: Map<Variable, String>): WeatherData = WeatherData(
+fun CurrentWeather.toDisplayWeather(units: Map<Variable, String>): DisplayWeather = DisplayWeather(
     time = time.toJavaLocalDateTime(),
     weatherType = weatherCodeWMO.let { WeatherType.fromWMO(it.toInt()) },
-    temperature = Measurement(temperature, units[Variable.TEMPERATURE_2M]!!),
-    windSpeed = Measurement(windSpeed, units[Variable.WIND_SPEED_10M]!!),
-    windDirection = Measurement(windDirection, units[Variable.WIND_DIRECTION_10M]!!)
+    temperature = DisplayData(temperature, units[Variable.TEMPERATURE_2M]!!),
+    windSpeed = DisplayData(windSpeed, units[Variable.WIND_SPEED_10M]!!),
+    windDirection = DisplayData(windDirection, units[Variable.WIND_DIRECTION_10M]!!)
 )
 
-fun OpenMeteoData.toWeatherInfo(): WeatherInfo {
-    val current = currentWeather?.toWeatherData(hourlyUnits!!)
-    val forecast = hourlyData?.toWeatherDataList(hourlyUnits!!)
-    return WeatherInfo(current, forecast)
+fun OpenMeteoData.toDisplayData(): DisplayInfo {
+    val current = currentWeather ?. toDisplayWeather(hourlyUnits!!)
+    val forecast = hourlyData ?. let { mapToDisplay(it.data, hourlyUnits!!) }
+    return DisplayInfo(current, forecast)
 }

@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.presentation
+package com.sburov.aboutweather.presentation.ui.compose
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -10,10 +10,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arrow.core.Either
+import com.sburov.aboutweather.presentation.DataError
+import com.sburov.aboutweather.presentation.DisplayInfo
 
 @Composable
 fun WeatherForecast(
-    info: Either<DataError, WeatherInfo>,
+    info: Either<DataError, DisplayInfo>,
     modifier: Modifier = Modifier
 ) {
     when (info) {
@@ -34,7 +36,7 @@ fun WeatherForecast(
                     LazyRow(content = {
                         items(data) { weatherData ->
                             WeatherHourlyDisplay(
-                                weatherData = weatherData,
+                                displayWeather = weatherData,
                                 modifier = Modifier
                                     .height(100.dp)
                                     .padding(horizontal = 16.dp)

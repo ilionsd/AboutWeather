@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.presentation
+package com.sburov.aboutweather.presentation.ui.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -13,16 +13,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.sburov.aboutweather.presentation.DisplayWeather
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun WeatherHourlyDisplay(
-    weatherData: WeatherData,
+    displayWeather: DisplayWeather,
     modifier: Modifier = Modifier,
     textColor: Color = Color.White
 ) {
-    val formattedTime = remember(weatherData) {
-        weatherData.time.format(
+    val formattedTime = remember(displayWeather) {
+        displayWeather.time.format(
             DateTimeFormatter.ofPattern("HH:mm")
         )
     }
@@ -36,12 +37,12 @@ fun WeatherHourlyDisplay(
             color = Color.LightGray
         )
         Image(
-            painter = painterResource(id = weatherData.weatherType.iconRes),
+            painter = painterResource(id = displayWeather.weatherType.iconRes),
             contentDescription = null,
             modifier = Modifier.width(40.dp)
         )
         Text(
-            text = "${weatherData.temperature}",
+            text = "${displayWeather.temperature}",
             color = textColor,
             fontWeight = FontWeight.Bold
         )

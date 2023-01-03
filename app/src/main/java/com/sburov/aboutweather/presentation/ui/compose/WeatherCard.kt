@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.presentation
+package com.sburov.aboutweather.presentation.ui.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,12 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arrow.core.Either
 import com.sburov.aboutweather.R
+import com.sburov.aboutweather.presentation.DataError
+import com.sburov.aboutweather.presentation.DisplayInfo
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 @Composable
 fun WeatherCard(
-    info: Either<DataError, WeatherInfo>,
+    info: Either<DataError, DisplayInfo>,
     backgroundColor: Color,
     modifier: Modifier = Modifier
 ) {

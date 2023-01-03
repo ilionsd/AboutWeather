@@ -61,14 +61,14 @@ class OpenWeatherMapClient(
         Either.Right(data)
     } catch (e: RedirectResponseException) {
         // 3xx
-        Either.Left(ApiError.UnknownError(e.response.status.value))
+        Either.Left(ApiError.RedirectResponse(e.response.status.value))
     } catch (e: ClientRequestException) {
         // 4xx
-        Either.Left(ApiError.UnknownError(e.response.status.value))
+        Either.Left(ApiError.ClientRequest(e.response.status.value))
     } catch (e: ServerResponseException) {
         // 5xx
-        Either.Left(ApiError.UnknownError(e.response.status.value))
+        Either.Left(ApiError.ServerResponse(e.response.status.value))
     } catch (e: Exception) {
-        Either.Left(ApiError.NetworkError)
+        Either.Left(ApiError.UnknownError)
     }
 }

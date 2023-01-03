@@ -72,12 +72,11 @@ class LocationReceiverImpl @Inject constructor(
     override fun startListeningToLocationUpdates() {
         if (!isListeningToLocationUpdates) {
             locationClient.requestLocationUpdates(
-                LocationRequest.create()
-                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(LOCATION_UPDATE_INTERVAL_10M)
-                    .setSmallestDisplacement(LOCATION_UPDATE_DISPLACEMENT_1000M)
-                    .setMaxWaitTime(LOCATION_UPDATE_MAXWAITTIME_5S)
-                    .setWaitForAccurateLocation(false),
+                LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, LOCATION_UPDATE_INTERVAL_10M)
+                    .setMinUpdateDistanceMeters(LOCATION_UPDATE_DISPLACEMENT_1000M)
+                    .setMaxUpdateDelayMillis(LOCATION_UPDATE_MAXWAITTIME_5S)
+                    .setWaitForAccurateLocation(false)
+                    .build(),
                 locationCallback,
                 Looper.getMainLooper()
             ).apply {

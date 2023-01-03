@@ -9,6 +9,7 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.resources.*
+import io.ktor.client.statement.*
 import javax.inject.Inject
 
 class OpenMeteoClient @Inject constructor()
@@ -24,8 +25,8 @@ class OpenMeteoClient @Inject constructor()
     override suspend fun getForecast(location: Location): Either<ApiError, OpenMeteoData> =
         getForecast(location.latitude.toFloat(), location.longitude.toFloat())
 
-    suspend fun getForecast(lat: Float, lon: Float) : Either<ApiError, OpenMeteoData> = try {
-        val response = client.get(
+    suspend fun getForecast(lat: Float, lon: Float): Either<ApiError, OpenMeteoData> = try {
+        makeGetRequest(
             OpenMeteoRestApi.Forecast(
                 OpenMeteoRestApi(
                     TemperatureUnit.C,
@@ -43,19 +44,46 @@ class OpenMeteoClient @Inject constructor()
                     Variable.HUMIDITY_RELATIVE_2M,
                     Variable.WEATHER_CODE_WMO), true
             )
-        )
-        val data: OpenMeteoData = response.body()
-        Either.Right(data)
+        ) .map { response ->
+            response.body()
+        }
+    } catch (e: NoTransformationFoundException) {
+        Either.Left(ApiError.UnexpectedResponse)
+    }
+
+    suspend fun getCurrentWeather(lat: Float, lon: Float): Either<ApiError, OpenMeteoData> = try {
+        makeGetRequest(
+            OpenMeteoRestApi.Forecast(
+                OpenMeteoRestApi(
+                    TemperatureUnit.C,
+                    WindspeedUnit.M_S,
+                    PrecipitationUnit.MM,
+                    TimeFormat.ISO8601,
+                    TimeZone.AUTO
+                ),
+                lat, lon,
+                setOf(), true
+            )
+        ) .map { response ->
+            response.body()
+        }
+    } catch (e: NoTransformationFoundException) {
+        Either.Left(ApiError.UnexpectedResponse)
+    }
+
+    private suspend inline fun <reified T: Any> makeGetRequest(resource: T): Either<ApiError, HttpResponse> = try {
+        val response: HttpResponse = client.get(resource)
+        Either.Right(response)
     } catch (e: RedirectResponseException) {
         // 3xx
-        Either.Left(ApiError.UnknownError(e.response.status.value))
+        Either.Left(ApiError.RedirectResponse(e.response.status.value))
     } catch (e: ClientRequestException) {
         // 4xx
-        Either.Left(ApiError.UnknownError(e.response.status.value))
+        Either.Left(ApiError.ClientRequest(e.response.status.value))
     } catch (e: ServerResponseException) {
         // 5xx
-        Either.Left(ApiError.UnknownError(e.response.status.value))
+        Either.Left(ApiError.ServerResponse(e.response.status.value))
     } catch (e: Exception) {
-        Either.Left(ApiError.NetworkError)
+        Either.Left(ApiError.UnknownError)
     }
 }

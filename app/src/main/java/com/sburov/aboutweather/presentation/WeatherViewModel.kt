@@ -6,13 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
-import com.sburov.aboutweather.data.mappers.toWeatherInfo
+import com.sburov.aboutweather.data.mappers.toDisplayData
 import com.sburov.aboutweather.domain.LocationProvider
 import com.sburov.aboutweather.domain.LocationReceiver
 import com.sburov.aboutweather.domain.WeatherDataProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,7 +21,7 @@ class WeatherViewModel @Inject constructor(
     private val weatherDataProvider: WeatherDataProvider,
 ) : ViewModel() {
 
-    var info by mutableStateOf<Either<DataError, WeatherInfo>>(Either.Left(DataError.GeolocationUnavailable))
+    var info by mutableStateOf<Either<DataError, DisplayInfo>>(Either.Left(DataError.GeolocationUnavailable))
         private set
 
     fun loadWeatherInfo() {
@@ -36,7 +35,7 @@ class WeatherViewModel @Inject constructor(
 
                 info = locationProvider.getCurrentLocation()?.let { location ->
                     weatherDataProvider.getForecast(location)
-                        .bimap({ _ -> DataError.WeatherInfoUnavailable }, { data -> data.toWeatherInfo() })
+                        .bimap({ _ -> DataError.WeatherInfoUnavailable }, { data -> data.toDisplayData() })
                 } ?: Either.Left(DataError.GeolocationUnavailable)
             }
         }
@@ -52,7 +51,7 @@ class WeatherViewModel @Inject constructor(
                 info = Either.Left(DataError.InProgress)
                 locationReceiver.addLocationDataUpdateListener {
                     info = weatherDataProvider.getForecast(it)
-                            .bimap({ _ -> DataError.WeatherInfoUnavailable }, { data -> data.toWeatherInfo() })
+                            .bimap({ _ -> DataError.WeatherInfoUnavailable }, { data -> data.toDisplayData() })
                 }
                 locationReceiver.startListeningToLocationUpdates()
             }

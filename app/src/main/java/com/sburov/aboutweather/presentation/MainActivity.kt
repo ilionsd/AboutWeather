@@ -21,12 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import arrow.core.Either
 import com.sburov.aboutweather.R
-import com.sburov.aboutweather.domain.LocationReceiver
+import com.sburov.aboutweather.presentation.ui.compose.WeatherCard
+import com.sburov.aboutweather.presentation.ui.compose.WeatherForecast
 import com.sburov.aboutweather.presentation.ui.theme.AboutWeatherTheme
 import com.sburov.aboutweather.presentation.ui.theme.DarkBlue
 import com.sburov.aboutweather.presentation.ui.theme.DeepBlue
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
