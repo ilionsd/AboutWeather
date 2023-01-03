@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arrow.core.Either
 import com.sburov.aboutweather.R
-import com.sburov.aboutweather.presentation.DataError
-import com.sburov.aboutweather.presentation.DisplayInfo
+import com.sburov.aboutweather.domain.weather.DataError
+import com.sburov.aboutweather.domain.weather.DisplayInfo
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
@@ -75,27 +75,30 @@ fun WeatherCard(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceAround
                         ) {
-//                            WeatherDataDisplay(
-//                                value = data.pressure.roundToInt(),
-//                                unit = "hpa",
-//                                icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
-//                                iconTint = Color.White,
-//                                textStyle = TextStyle(color = Color.White)
-//                            )
-//                            WeatherDataDisplay(
-//                                value = data.humidity.roundToInt(),
-//                                unit = "%",
-//                                icon = ImageVector.vectorResource(id = R.drawable.ic_drop),
-//                                iconTint = Color.White,
-//                                textStyle = TextStyle(color = Color.White)
-//                            )
-                            WeatherDataDisplay(
-                                value = data.windSpeed.value.roundToInt(),
-                                unit = data.windSpeed.unit,
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
-                                iconTint = Color.White,
-                                textStyle = TextStyle(color = Color.White)
-                            )
+                            data.pressure ?. let {
+                                WeatherDataDisplay(
+                                    text = "$it",
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_pressure),
+                                    iconTint = Color.White,
+                                    textStyle = TextStyle(color = Color.White)
+                                )
+                            }
+                            data.pressure ?. let {
+                                WeatherDataDisplay(
+                                    text = "$it",
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_drop),
+                                    iconTint = Color.White,
+                                    textStyle = TextStyle(color = Color.White)
+                                )
+                            }
+                            data.windSpeed ?. let {
+                                WeatherDataDisplay(
+                                    text = "$it",
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_wind),
+                                    iconTint = Color.White,
+                                    textStyle = TextStyle(color = Color.White)
+                                )
+                            }
                         }
                     }
                 }

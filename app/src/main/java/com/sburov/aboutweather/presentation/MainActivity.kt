@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import arrow.core.Either
 import com.sburov.aboutweather.R
+import com.sburov.aboutweather.domain.weather.DataError
 import com.sburov.aboutweather.presentation.ui.compose.WeatherCard
 import com.sburov.aboutweather.presentation.ui.compose.WeatherForecast
 import com.sburov.aboutweather.presentation.ui.theme.AboutWeatherTheme

@@ -10,6 +10,8 @@ import com.sburov.aboutweather.data.mappers.toDisplayData
 import com.sburov.aboutweather.domain.LocationProvider
 import com.sburov.aboutweather.domain.LocationReceiver
 import com.sburov.aboutweather.domain.WeatherDataProvider
+import com.sburov.aboutweather.domain.weather.DataError
+import com.sburov.aboutweather.domain.weather.DisplayInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

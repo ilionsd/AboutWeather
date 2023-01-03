@@ -3,28 +3,32 @@ package com.sburov.aboutweather.data.mappers
 import com.sburov.aboutweather.data.remote.openmeteo.CurrentWeather
 import com.sburov.aboutweather.data.remote.openmeteo.OpenMeteoData
 import com.sburov.aboutweather.data.remote.openmeteo.Variable
-import com.sburov.aboutweather.presentation.DisplayData
-import com.sburov.aboutweather.presentation.DisplayWeather
-import com.sburov.aboutweather.presentation.DisplayInfo
-import com.sburov.aboutweather.presentation.WeatherType
+import com.sburov.aboutweather.data.serialization.DataGrid
+import com.sburov.aboutweather.domain.weather.*
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.LocalDateTime
 
-fun mapToDisplay(data: Map<Variable, Array<Any?>>, units: Map<Variable, String>) : List<DisplayWeather> {
-    val list = mutableListOf<DisplayWeather>()
+inline fun <reified T> toDisplayData(value: Any?, unit: String?): DisplayData<T>? = value ?. let {
+    DisplayData(it as T, unit!!)
+}
 
-    val dataSize = data[Variable.TIME]!!.size
-    for (k in 0 until dataSize) {
+fun mapToDisplay(dataGrid: DataGrid<Variable>, units: Map<Variable, String>) : List<DisplayWeather> {
+    val list = mutableListOf<DisplayWeather>()
+    for (k in 0 until dataGrid.size) {
         try {
             DisplayWeather(
-                time = (data[Variable.TIME]!![k] as LocalDateTime).toJavaLocalDateTime(),
-                weatherType = WeatherType.fromWMO(data[Variable.WEATHER_CODE_WMO]!![k] as Int),
-                temperature = DisplayData((data[Variable.TEMPERATURE_2M]!![k] as Float),
-                    units[Variable.TEMPERATURE_2M]!!),
-                windSpeed = DisplayData((data[Variable.WIND_SPEED_10M]!![k] as Float),
-                    units[Variable.WIND_SPEED_10M]!!),
-                windDirection = DisplayData(data[Variable.WIND_DIRECTION_10M]!![k] as Float,
-                    units[Variable.WIND_DIRECTION_10M]!!)
+                // Main data
+                time = dataGrid.get<LocalDateTime>(Variable.TIME, k)!!.toJavaLocalDateTime(),
+                weatherType = dataGrid.get<Int>(Variable.WEATHER_CODE_WMO, k)!!.let { code ->
+                    WeatherType.fromWMO(code)
+                },
+                temperature = toDisplayData(dataGrid[Variable.TEMPERATURE_2M, k], units[Variable.TEMPERATURE_2M])!!,
+                // Included in current weather
+                windSpeed = toDisplayData(dataGrid[Variable.WIND_SPEED_10M, k], units[Variable.WIND_SPEED_10M]),
+                windDirection = toDisplayData(dataGrid[Variable.WIND_DIRECTION_10M, k], units[Variable.WIND_DIRECTION_10M]),
+                // Forecast
+                pressure = toDisplayData(dataGrid[Variable.PRESSURE_SURFACE, k], units[Variable.PRESSURE_SURFACE]),
+                humidity = toDisplayData(dataGrid[Variable.HUMIDITY_RELATIVE_2M, k], units[Variable.HUMIDITY_RELATIVE_2M])
             )
         }
         catch (e: NullPointerException) {
@@ -41,11 +45,13 @@ fun CurrentWeather.toDisplayWeather(units: Map<Variable, String>): DisplayWeathe
     weatherType = weatherCodeWMO.let { WeatherType.fromWMO(it.toInt()) },
     temperature = DisplayData(temperature, units[Variable.TEMPERATURE_2M]!!),
     windSpeed = DisplayData(windSpeed, units[Variable.WIND_SPEED_10M]!!),
-    windDirection = DisplayData(windDirection, units[Variable.WIND_DIRECTION_10M]!!)
+    windDirection = DisplayData(windDirection, units[Variable.WIND_DIRECTION_10M]!!),
+    pressure = null,
+    humidity = null,
 )
 
 fun OpenMeteoData.toDisplayData(): DisplayInfo {
     val current = currentWeather ?. toDisplayWeather(hourlyUnits!!)
-    val forecast = hourlyData ?. let { mapToDisplay(it.data, hourlyUnits!!) }
+    val forecast = hourlyData ?. let { dataGrid -> mapToDisplay(dataGrid, hourlyUnits!!) }
     return DisplayInfo(current, forecast)
 }

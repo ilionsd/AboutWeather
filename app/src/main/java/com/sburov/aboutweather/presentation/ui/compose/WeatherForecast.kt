@@ -10,8 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import arrow.core.Either
-import com.sburov.aboutweather.presentation.DataError
-import com.sburov.aboutweather.presentation.DisplayInfo
+import com.sburov.aboutweather.domain.weather.DataError
+import com.sburov.aboutweather.domain.weather.DisplayInfo
 
 @Composable
 fun WeatherForecast(

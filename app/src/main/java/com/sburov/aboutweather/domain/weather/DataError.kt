@@ -1,4 +1,4 @@
-package com.sburov.aboutweather.presentation
+package com.sburov.aboutweather.domain.weather
 
 sealed class DataError {
     object GeolocationUnavailable: DataError()

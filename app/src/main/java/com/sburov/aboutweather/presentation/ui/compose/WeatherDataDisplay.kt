@@ -16,8 +16,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun WeatherDataDisplay(
-    value: Int,
-    unit: String,
+    text: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle(),
@@ -35,7 +34,7 @@ fun WeatherDataDisplay(
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = "$value$unit",
+            text = text,
             style = textStyle
         )
     }

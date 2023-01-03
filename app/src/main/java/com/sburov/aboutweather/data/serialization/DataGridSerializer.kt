@@ -9,26 +9,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeCollection
 
-open class DataGrid<T>(
-    val data: Map<T, Array<Any?>>,
-) {
-    val size: Int
-    init {
-        val it = data.values.iterator()
-        size = it.next().size
-        while (it.hasNext()) {
-            assert(size == it.next().size)
-        }
-    }
-
-    inline fun <reified V> getDataAs(key: T): Array<V?> = get(key) as Array<V?>
-
-    fun get(key: T): Array<Any?>? = data[key]
-}
-
-public inline operator fun <T> DataGrid<T>.iterator(): Iterator<Map.Entry<T, Array<Any?>>> = data.entries.iterator()
-
-
 open class DataGridSerializer<T>(
     serialDescriptor: SerialDescriptor,
     private val nameSerializer: KSerializer<T>,

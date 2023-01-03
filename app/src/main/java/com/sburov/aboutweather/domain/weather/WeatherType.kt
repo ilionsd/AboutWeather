@@ -1,25 +1,7 @@
-package com.sburov.aboutweather.presentation
+package com.sburov.aboutweather.domain.weather
 
 import androidx.annotation.DrawableRes
 import com.sburov.aboutweather.R
-import java.time.LocalDateTime
-
-data class DisplayInfo(
-    val current: DisplayWeather? = null,
-    val forecast: List<DisplayWeather>? = null,
-)
-
-data class DisplayWeather(
-    val time: LocalDateTime,
-    val weatherType: WeatherType,
-    val temperature: DisplayData<Float>,
-    val windSpeed: DisplayData<Float>,
-    val windDirection: DisplayData<Float>,
-)
-
-data class DisplayData<T>(val value: T, val unit: String) {
-    override fun toString(): String = "${value}${unit}"
-}
 
 sealed class WeatherType(
     val weatherDesc: String,
@@ -196,4 +178,3 @@ sealed class WeatherType(
         }
     }
 }
-
